@@ -1,6 +1,9 @@
 package app;
 
+import java.awt.GridLayout;
 import java.awt.event.*;
+import java.io.*;
+
 import javax.swing.*;
 
 /**
@@ -17,18 +20,29 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	 */
 	private static String weight_s = "";
 	private static String height_s = "";
+	private static String BMI_s = "";
+	private static String nick_s = "";
 	private static double weight_d = 0;
 	private static double height_d = 0;
 	private static double BMI = 0;
+	
+	//String fields used for correctly formatting text that is send to file
+	//Further there are going to be '\t' characters, depending on size of texts
+	private static String tabNick = "";
+	private static String tabBMI = "";
+	private static String tabWeight = "";
+	
+	
+	private static File file = new File("data.txt");
 	
 	/**
 	 * Private static fields containing components of the window and DialogBoxes
 	 */
 	private static JFrame window;
-	private static JLabel label1, label2, label3, dialogLabel1, dialogLabel2, aboutLabel1, aboutLabel2, aboutLabel3;
-	private static JTextField weight, height;
+	private static JLabel label1, label2, label3, label4, dialogLabel1, dialogLabel2, aboutLabel1, aboutLabel2, aboutLabel3;
+	private static JTextField weight, height, nick;
 	private static JDialog dialog, aboutDialog;
-	private static JButton calculateButton, about, close;
+	private static JButton calculateButton, about, close, saveButton;
 	private static JSeparator separator;
 	
 	
@@ -132,6 +146,13 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		label3.setText("Height [m]");
 		label3.setVisible(true);
 		
+		label4 = new JLabel();
+		window.add(label3);
+		label4.setSize(100,25);
+		label4.setLocation(30,120);
+		label4.setText("Height [m]");
+		label4.setVisible(true);
+		
 		weight = new JTextField();
 		window.add(weight);
 		weight.setSize(70,20);
@@ -144,12 +165,117 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		height.setLocation(300,90);
 		height.setVisible(true);
 		
+		nick = new JTextField();
+		window.add(nick);
+		nick.setSize(70,20);
+		nick.setLocation(300,120);
+		nick.setVisible(true);
+		
 		calculateButton = new JButton();
 		window.add(calculateButton);
 		calculateButton.setSize(90,25);
 		calculateButton.setLocation(280,120);
 		calculateButton.setText("Calculate");
 		calculateButton.setVisible(true);
+		
+		saveButton = new JButton();
+		window.add(saveButton);
+		saveButton.setSize(90,25);
+		saveButton.setLocation(280,150);
+		saveButton.setText("Save");
+		saveButton.setVisible(true);
+		
+		calculateButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				 
+	                	
+	                	//Parsing may throw NumberFormatException in case that text in TextBox wont be possible to change to double
+	                	try
+	                	{
+	                		//Update Strings with text typed in the fields
+	                		weight_s = weight.getText();
+	                		height_s = height.getText();
+	                		nick_s = nick.getText();
+	                		
+	                		calculate();
+	                		
+	                		//Take first 11 letters of nicknames
+	                		//It is needed due to way of displaying the text
+	                		//Without it '\t' character would move 'BMI' field to 'Weight' etc.
+	                		if(nick_s.length()>11) nick_s = nick_s.substring(0, 11);
+	                		
+	                		
+	                		//Save to file
+	                		try
+	                		{
+	                    		FileWriter out = new FileWriter(file,true);	//the second argument allows to append text to existing file
+	                    		out.write(nick_s + tabNick);
+	                    		out.write(BMI_s + tabBMI);
+	                    		out.write(weight_s + tabWeight);
+	                    		out.write(height_s + "\r\n");	//add entry to next line
+	                    		out.close();					//flush and close the stream
+	                		}
+	                		catch(IOException f)
+	                		{
+	                			MessageDialog.showMessageDialog(textGUI, "File error", "Save to file was not possible", MessageDialogButton.OK);
+	                		}
+	                		
+	                        MessageDialog.showMessageDialog(textGUI, "BMI", "Calculated BMI: " + BMI + "\n" + selectCategory(), MessageDialogButton.OK);
+	                	}
+	                	catch(NumberFormatException e)
+	                	{
+	                		MessageDialog.showMessageDialog(textGUI, "ERROR", "NumberFormatException:\n" + "Please check if the fields are correctly filled", MessageDialogButton.OK);
+	                	}
+	                	
+	                	
+	                	
+	                }
+	            }).setLayoutData(GridLayout.createLayoutData(GridLayout.Alignment.CENTER, GridLayout.Alignment.CENTER)));
+				
+			}
+		});
+	}
+
+
+		saveButton.addActionListener(new ActionListener()){
+		
+			 public void run()
+             {
+        		 try
+        		 {
+        			 FileReader in = new FileReader(file);
+        			 
+        			 //BufferedReader created to load lines of text instead of simple characters
+        			 BufferedReader buffReader = new BufferedReader(in);
+        			 
+        			 //Local variables to keep read text from file
+        			 String fileText = "";
+        			 String line = "";
+        			 
+        			 //Do until EOF is not reached (specified by returning null by method readLine)
+        			 while( (line = buffReader.readLine()) != null)
+        			 {
+        				 fileText += line + "\r\n";
+        			 }
+        			 
+        			 buffReader.close();
+        			 in.close();
+        			 
+        			 //Added 7 spaces before \r\n due to lanterna issue - it does not count special characters to Dialog size calculations
+            		 MessageDialog.showMessageDialog(textGUI, "Saved data", "Name\t\tBMI     Weight\tHeight       \r\n" + fileText, MessageDialogButton.OK);
+        		 }
+        		 catch(IOException e)
+        		 {
+        			 MessageDialog.showMessageDialog(textGUI, "File error", "Could not load the file", MessageDialogButton.OK);
+        		 }
+             }
+        }).setLayoutData(GridLayout.createLayoutData(GridLayout.Alignment.CENTER, GridLayout.Alignment.CENTER)));
+        
+			
+			
+		}
 		
 		separator = new JSeparator();
 		window.add(separator);
