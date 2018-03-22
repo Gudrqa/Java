@@ -1,6 +1,5 @@
 package app;
 
-import java.awt.GridLayout;
 import java.awt.event.*;
 import java.io.*;
 
@@ -15,8 +14,8 @@ import javax.swing.*;
 public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	
 	/**
-	 * Private static fields containing weight and height typed by the user (with '_s' there are Strings, with '_d' double numbers)
-	 * BMI - field for result of the calculations
+	 * Private static fields containing weight and height entered by the user (with '_s' there are Strings, with '_d' double numbers)
+	 * BMI - field for the result of the calculations
 	 */
 	private static String weight_s = "";
 	private static String height_s = "";
@@ -32,8 +31,11 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	private static String tabBMI = "";
 	private static String tabWeight = "";
 	
+	/**
+	 * Private static field for the save file's destination
+	 */
 	
-	private static File file = new File("data.txt");
+	private static File file = new File("C:\\Users\\Public\\Documents\\saveBMIAM.txt");
 	
 	/**
 	 * Private static fields containing components of the window and DialogBoxes
@@ -99,11 +101,12 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	{
 		weight_s = weight.getText();
 		height_s = height.getText();
+		nick_s = nick.getText();
 	}
 	
 	/**
 	 * Private method responsible for checking String if it contains comma instead of dot.
-	 * When there is comma, commaToDot changes it to dot allowing parsing that string to double.
+	 * If there is comma, commaToDot changes it to dot allowing parsing that string to double.
 	 * @param s string to check
 	 * @return string with dot instead of comma
 	 */
@@ -114,9 +117,18 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		
 	}
 	
+	/**
+	 * Private static field for the content of the save file
+	 */
+	private static String line=null;
+	
+	/**
+	 * private static method that displays the saved file's content in a JDialog
+	 */
+	
 	private static void saveDialog(){
-
-        JFrame frame = new JFrame();
+		
+		        JFrame frame = new JFrame();
 
         saveDialogC = new JDialog(frame, "SAVE", true);
 
@@ -124,18 +136,33 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 
         saveDialogC.setLocationRelativeTo(null);
 
-        saveDialogC.setSize(400,400);
+        saveDialogC.setSize(300,100);
 
-        saveDialogC.setVisible(true);
 
+		try {
         
-        BufferedReader save = null;
+			FileReader fileReader = new FileReader(file);
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			
+			while((line =  bufferedReader.readLine()) != null) {
+				
+								
+				saveDialogC.add(new JLabel(line));
+				
+			}
+			
+			saveDialogC.setVisible(true);
+			
+			bufferedReader.close();
+			
         
-        save = new BufferedReader(new FileReader("C:\\temp\\save.txt"));
-        String line;
-        while ((line = save.readLine()) != null) {
-            	saveDialogC.add(new JLabel(line));
-            }
+		}
+		catch(IOException ex) {
+			
+			JOptionPane.showMessageDialog(window, "ERROR");
+			
+		}
+        
     }
 	
 	
@@ -146,7 +173,7 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	{
 		//MAIN WINDOW
 		window = new JFrame();
-		window.setSize(400,245);
+		window.setSize(400,300);
 		window.setLayout(null);
 		window.setResizable(false);
 		window.setTitle("BMI Calculator");
@@ -176,10 +203,10 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		label3.setVisible(true);
 		
 		label4 = new JLabel();
-		window.add(label3);
+		window.add(label4);
 		label4.setSize(100,25);
 		label4.setLocation(30,120);
-		label4.setText("Height [m]");
+		label4.setText("Nick");
 		label4.setVisible(true);
 		
 		weight = new JTextField();
@@ -203,14 +230,14 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		calculateButton = new JButton();
 		window.add(calculateButton);
 		calculateButton.setSize(90,25);
-		calculateButton.setLocation(280,120);
+		calculateButton.setLocation(280,170);
 		calculateButton.setText("Calculate");
 		calculateButton.setVisible(true);
 		
 		saveButton = new JButton();
 		window.add(saveButton);
 		saveButton.setSize(90,25);
-		saveButton.setLocation(280,150);
+		saveButton.setLocation(10,170);
 		saveButton.setText("History");
 		saveButton.setVisible(true);
 		
@@ -227,16 +254,24 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		    		dialog.setTitle("BMI");
 		    		dialog.setVisible(true);
 		    		
-		    		FileOutputStream file = new FileOutputStream("C:\\temp\\save.txt");
+		    		try {
+		    		
+		    		FileOutputStream file = new FileOutputStream("C:\\Users\\Public\\Documents\\saveBMIAM.txt");
 		    		
 		    		String s2=String.valueOf(BMI);
 		    		
-		    		String s=nick.getText()+" "+weight.getText()+"kg "+height.getText()+"m BMI= s2\n";
+		    		String s=nick.getText()+" "+weight.getText()+"kg "+height.getText()+"m BMI= "+s2+"\n";
 		    		
 		    		byte b[]=s.getBytes();
 		    		
 		    		file.write(b);
 		    		file.close();
+		    		}
+		    		catch(Exception exe) {
+		    			
+		    			JOptionPane.showMessageDialog(window, "ERROR");
+		    			
+		    		}
 		    		
 		    	}
 		    	catch(NumberFormatException ex)
@@ -256,20 +291,10 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		{  
 		    public void actionPerformed(ActionEvent e)
 		    {
-		    	try
-		    	{
-		    		saveDialog();
-		    		
-		    	}
-		    	catch(NumberFormatException ex)
-		    	{
-		    		//Otherwise the DialogBox will inform user about wrong data in the fields
-		    		dialogLabel1.setText("Cannot read the file");
-		    		dialogLabel2.setText("Please try again");
-		    		dialog.setTitle("ERROR");
-		    		dialog.setVisible(true);
-		    	}
+		    	 saveDialog();
 		    }
+		   
+		    
 	    } );
 			
 			
@@ -283,7 +308,7 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		
 		about = new JButton();
 		window.add(about);
-		about.setLocation(180,175);
+		about.setLocation(180,200);
 		about.setSize(90,25);
 		about.setText("About");
 		about.setVisible(true);
@@ -291,7 +316,7 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		close = new JButton();
 		window.add(close);
 		close.setSize(90,25);
-		close.setLocation(280,175);
+		close.setLocation(280,200);
 		close.setText("Close");
 		close.setVisible(true);
 		
@@ -425,4 +450,5 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		
 		
 	}
-}
+}          	
+	
