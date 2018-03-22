@@ -1,9 +1,20 @@
 package app;
 
-import java.awt.event.*;
-import java.io.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JSeparator;
+import javax.swing.JTextField;
 
 /**
  * BMI Calculator with GUI
@@ -13,10 +24,9 @@ import javax.swing.*;
 
 public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	
-	/**
-	 * Private static fields containing weight and height entered by the user (with '_s' there are Strings, with '_d' double numbers)
-	 * BMI - field for the result of the calculations
-	 */
+	//Private static fields containing weight and height entered by the user (with '_s' there are Strings, with '_d' double numbers)
+	//BMI - field for the result of the calculations
+	//nick - nickname entered by user
 	private static String weight_s = "";
 	private static String height_s = "";
 	private static String BMI_s = "";
@@ -25,29 +35,18 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	private static double height_d = 0;
 	private static double BMI = 0;
 	
-	//String fields used for correctly formatting text that is send to file
-	//Further there are going to be '\t' characters, depending on size of texts
-	private static String tabNick = "";
-	private static String tabBMI = "";
-	private static String tabWeight = "";
-	
 	/**
 	 * Private static field for the save file's destination
 	 */
+	private static File file = new File("data.txt");
 	
-	private static File file = new File("C:\\Users\\Public\\Documents\\saveBMIAM.txt");
-	
-	/**
-	 * Private static fields containing components of the window and DialogBoxes
-	 */
+	//Private static fields containing components of the window and DialogBoxes
 	private static JFrame window;
 	private static JLabel label1, label2, label3, label4, dialogLabel1, dialogLabel2, aboutLabel1, aboutLabel2, aboutLabel3;
 	private static JTextField weight, height, nick;
-	private static JDialog dialog, aboutDialog, saveDialog;
-	private static JButton calculateButton, about, close, saveButton;
+	private static JDialog dialog, aboutDialog, historyDialog;
+	private static JButton calculateButton, about, close, history;
 	private static JSeparator separator;
-	
-	private static JDialog saveDialogC;
 	
 	
 	/**
@@ -70,9 +69,27 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
     	BMI = weight_d / height_d / height_d;
     	
     	//Rounding to two digits after comma
-    	BMI = BMI * 100;
-    	BMI = Math.round(BMI);
-    	BMI = BMI / 100;
+    	BMI = round(BMI);
+    	weight_d = round(weight_d);
+    	height_d = round(height_d);
+    	
+    	//Saving rounded numbers to strings
+    	BMI_s = String.valueOf(BMI);
+    	weight_s = String.valueOf(weight_d);
+    	height_s = String.valueOf(height_d);
+	}
+	
+	/**
+	 * Private method responsible for rounding double numbers up to 2 digits after comma
+	 * @param arg number to round
+	 * @return number rounded up to two digits after comma
+	 */
+	private static double round(double arg)
+	{
+		arg = arg * 100;
+		arg = Math.round(arg);
+		arg = arg / 100;
+		return arg;
 	}
 	
 	/**
@@ -110,59 +127,73 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	 * @param s string to check
 	 * @return string with dot instead of comma
 	 */
-	
 	private static String commaToDot(String s) {
-		
-		return s.replace(',',',');
-		
+		return s.replace(',','.');
 	}
+
 	
 	/**
-	 * Private static field for the content of the save file
+	 * Private static method that displays the saved file's content in a JDialog
 	 */
-	private static String line=null;
-	
-	/**
-	 * private static method that displays the saved file's content in a JDialog
-	 */
-	
-	private static void saveDialog(){
+	private static void historyDialog(){
 		
-		        JFrame frame = new JFrame();
+        historyDialog = new JDialog(window, "History");
+        historyDialog.setLayout(null);
+        historyDialog.setResizable(false);
 
-        saveDialogC = new JDialog(frame, "SAVE", true);
+        try
+		 {
+			 FileReader in = new FileReader(file);
+			 
+			 //BufferedReader created to load lines of text instead of simple characters
+			 BufferedReader buffReader = new BufferedReader(in);
+			 
+			 //Local variable to keep line of read text from file
+			 String line = "";
+			 
+			 //Iterator used for placing labels in correct places
+			 int i = 0;
 
-      //  saveDialogC.setLayout(new FlowLayout());
-
-        saveDialogC.setLocationRelativeTo(null);
-
-        saveDialogC.setSize(300,100);
-
-
-		try {
-        
-			FileReader fileReader = new FileReader(file);
-			BufferedReader bufferedReader = new BufferedReader(fileReader);
-			
-			while((line =  bufferedReader.readLine()) != null) {
-				
-								
-				saveDialogC.add(new JLabel(line));
-				
-			}
-			
-			saveDialogC.setVisible(true);
-			
-			bufferedReader.close();
-			
-        
-		}
-		catch(IOException ex) {
-			
-			JOptionPane.showMessageDialog(window, "ERROR");
-			
-		}
-        
+			 //Do until EOF is not reached (specified by returning null by method readLine)
+			 while( (line = buffReader.readLine()) != null)
+			 {
+				//Create local label and set its location depending on i value
+				JLabel local = new JLabel(line);
+				local.setLocation(10,10+20*i);
+				local.setSize(330,25);
+				local.setVisible(true);
+				historyDialog.add(local);
+				 
+				i++;
+			 }
+			 
+			 //Close readers
+			 buffReader.close();
+			 in.close();
+			 
+			 //Change the DialogBox's size depending on number of lines in file
+			 historyDialog.setSize(350,90+20*i);
+			 historyDialog.setVisible(true);
+			 historyDialog.setLocationRelativeTo(null);
+			 
+			 //Close button
+			 JButton closeHistory = new JButton();
+			 historyDialog.add(closeHistory);
+			 closeHistory.setVisible(true);
+			 closeHistory.setText("Close");
+			 closeHistory.setSize(90,25);
+			 closeHistory.setLocation(130,20+20*i);
+			 closeHistory.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					historyDialog.dispose();
+				}
+			 });
+		 }
+		 catch(IOException e)
+		 {
+			 JOptionPane.showMessageDialog(window, "Could not load the file");
+		 }
     }
 	
 	
@@ -173,7 +204,7 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	{
 		//MAIN WINDOW
 		window = new JFrame();
-		window.setSize(400,300);
+		window.setSize(400,270);
 		window.setLayout(null);
 		window.setResizable(false);
 		window.setTitle("BMI Calculator");
@@ -230,16 +261,16 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		calculateButton = new JButton();
 		window.add(calculateButton);
 		calculateButton.setSize(90,25);
-		calculateButton.setLocation(280,170);
+		calculateButton.setLocation(280,160);
 		calculateButton.setText("Calculate");
 		calculateButton.setVisible(true);
 		
-		saveButton = new JButton();
-		window.add(saveButton);
-		saveButton.setSize(90,25);
-		saveButton.setLocation(10,170);
-		saveButton.setText("History");
-		saveButton.setVisible(true);
+		history = new JButton();
+		window.add(history);
+		history.setSize(90,25);
+		history.setLocation(180,160);
+		history.setText("History");
+		history.setVisible(true);
 		
 		calculateButton.addActionListener(new ActionListener()
 		{  
@@ -254,24 +285,24 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		    		dialog.setTitle("BMI");
 		    		dialog.setVisible(true);
 		    		
-		    		try {
+            		//Take first 11 letters of nicknames
+            		//It is made due to limited width of the DialogBox in which it is displayed
+            		if(nick_s.length()>11) nick_s = nick_s.substring(0, 11);
 		    		
-		    		FileOutputStream file = new FileOutputStream("C:\\Users\\Public\\Documents\\saveBMIAM.txt");
-		    		
-		    		String s2=String.valueOf(BMI);
-		    		
-		    		String s=nick.getText()+" "+weight.getText()+"kg "+height.getText()+"m BMI= "+s2+"\n";
-		    		
-		    		byte b[]=s.getBytes();
-		    		
-		    		file.write(b);
-		    		file.close();
-		    		}
-		    		catch(Exception exe) {
-		    			
-		    			JOptionPane.showMessageDialog(window, "ERROR");
-		    			
-		    		}
+            		//Save to file
+            		try
+            		{
+                		FileWriter out = new FileWriter(file,true);	//the second argument allows to append text to existing file
+                		out.write(nick_s + ": ");
+                		out.write("BMI=" + BMI_s + ", ");
+                		out.write("weight=" + weight_s + ", ");
+                		out.write("height=" + height_s + "\r\n");	//add entry to next line
+                		out.close();								//flush and close the stream
+            		}
+            		catch(IOException ex)
+            		{
+            			JOptionPane.showMessageDialog(window, "Save was not possible!");	
+            		}
 		    		
 		    	}
 		    	catch(NumberFormatException ex)
@@ -285,30 +316,24 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		    }
 	    });
 		
-	                		//READ
-		
-		saveButton.addActionListener(new ActionListener()
+	    //Load the history of calculations
+		history.addActionListener(new ActionListener()
 		{  
 		    public void actionPerformed(ActionEvent e)
 		    {
-		    	 saveDialog();
+		    	 historyDialog();
 		    }
-		   
-		    
 	    } );
 			
-			
-			
-		
 		separator = new JSeparator();
 		window.add(separator);
-		separator.setLocation(0,160);
+		separator.setLocation(0,195);
 		separator.setSize(400,1);
 		separator.setVisible(true);
 		
 		about = new JButton();
 		window.add(about);
-		about.setLocation(180,200);
+		about.setLocation(180,205);
 		about.setSize(90,25);
 		about.setText("About");
 		about.setVisible(true);
@@ -316,12 +341,11 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		close = new JButton();
 		window.add(close);
 		close.setSize(90,25);
-		close.setLocation(280,200);
+		close.setLocation(280,205);
 		close.setText("Close");
 		close.setVisible(true);
 		
-		
-		
+
 		//DIALOG BOX and components
 		dialog = new JDialog();
 		dialog.setSize(275,130);
@@ -358,7 +382,7 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		
 		//'ABOUT' DIALOG BOX and components
 		aboutDialog = new JDialog();
-		aboutDialog.setTitle("BMI Calculator v0.1");
+		aboutDialog.setTitle("BMI Calculator v0.2");
 		aboutDialog.setSize(150,150);
 		aboutDialog.setResizable(false);
 		aboutDialog.setLayout(null);
@@ -402,7 +426,6 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 
 	public static void main(String[] args)
 	{
-		
 		init();
 		
 		//Add Listener to calculateButton which detects events
@@ -447,8 +470,6 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 				System.exit(0);
 			}
 		});
-		
-		
 	}
 }          	
 	
