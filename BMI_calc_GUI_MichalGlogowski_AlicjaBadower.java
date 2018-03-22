@@ -9,7 +9,7 @@ import javax.swing.*;
 /**
  * BMI Calculator with GUI
  * @author Micha³ G³ogowski, Alicja Badower
- * @version 0.1
+ * @version 0.2
  */
 
 public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
@@ -44,6 +44,8 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	private static JDialog dialog, aboutDialog, saveDialog;
 	private static JButton calculateButton, about, close, saveButton;
 	private static JSeparator separator;
+	
+	private static JDialog saveDialogC;
 	
 	
 	/**
@@ -111,6 +113,30 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		return s.replace(',',',');
 		
 	}
+	
+	private static void saveDialog(){
+
+        JFrame frame = new JFrame();
+
+        saveDialogC = new JDialog(frame, "SAVE", true);
+
+      //  saveDialogC.setLayout(new FlowLayout());
+
+        saveDialogC.setLocationRelativeTo(null);
+
+        saveDialogC.setSize(400,400);
+
+        saveDialogC.setVisible(true);
+
+        
+        BufferedReader save = null;
+        
+        save = new BufferedReader(new FileReader("C:\\temp\\save.txt"));
+        String line;
+        while ((line = save.readLine()) != null) {
+            	saveDialogC.add(new JLabel(line));
+            }
+    }
 	
 	
 	/**
@@ -222,42 +248,7 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		    		dialog.setVisible(true);
 		    	}
 		    }
-	    } );
-		
-		
-	    private static JDialog saveDialogC;
-
-
-	    private static void saveDialog(){
-
-	        JFrame frame = new JFrame();
-	
-	        saveDialogC = new JDialog(frame, "SAVE", true);
-
-	      //  saveDialogC.setLayout(new FlowLayout());
-
-	        saveDialogC.setLocationRelativeTo(null);
-
-	        saveDialogC.setSize(400,400);
-
-	        saveDialogC.setVisible(true);
-
-	        
-	        BufferedReader save = null;
-	        
-	            save = new BufferedReader(new FileReader("C:\\temp\\save.txt"));
-	            String line;
-	            while ((line = save.readLine()) != null) {
-	                
-	            	saveDialogC.add(new JLabel(line));
-	            	
-	            }
-
-	    }
-
-		
-		
-		
+	    });
 		
 	                		//READ
 		
@@ -382,7 +373,7 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 				aboutDialog.setVisible(false);
 			}
 		});
-	
+	}
 
 	public static void main(String[] args)
 	{
@@ -434,4 +425,4 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		
 		
 	}
-	    
+}
