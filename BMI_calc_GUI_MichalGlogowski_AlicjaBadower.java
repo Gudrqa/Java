@@ -41,7 +41,7 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	private static JFrame window;
 	private static JLabel label1, label2, label3, label4, dialogLabel1, dialogLabel2, aboutLabel1, aboutLabel2, aboutLabel3;
 	private static JTextField weight, height, nick;
-	private static JDialog dialog, aboutDialog;
+	private static JDialog dialog, aboutDialog, saveDialog;
 	private static JButton calculateButton, about, close, saveButton;
 	private static JSeparator separator;
 	
@@ -105,10 +105,13 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	 * @param s string to check
 	 * @return string with dot instead of comma
 	 */
-	private static String commaToDot(String s)
-	{
-		return s.replace(',','.');
+	
+	private static String commaToDot(String s) {
+		
+		return s.replace(',',',');
+		
 	}
+	
 	
 	/**
 	 * Private method responsible for initializing components of the window and DialogBoxes
@@ -182,100 +185,104 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		window.add(saveButton);
 		saveButton.setSize(90,25);
 		saveButton.setLocation(280,150);
-		saveButton.setText("Save");
+		saveButton.setText("History");
 		saveButton.setVisible(true);
 		
-		calculateButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				 
-	                	
-	                	//Parsing may throw NumberFormatException in case that text in TextBox wont be possible to change to double
-	                	try
-	                	{
-	                		//Update Strings with text typed in the fields
-	                		weight_s = weight.getText();
-	                		height_s = height.getText();
-	                		nick_s = nick.getText();
-	                		
-	                		calculate();
-	                		
-	                		//Take first 11 letters of nicknames
-	                		//It is needed due to way of displaying the text
-	                		//Without it '\t' character would move 'BMI' field to 'Weight' etc.
-	                		if(nick_s.length()>11) nick_s = nick_s.substring(0, 11);
-	                		
-	                		
-	                		//Save to file
-	                		try
-	                		{
-	                    		FileWriter out = new FileWriter(file,true);	//the second argument allows to append text to existing file
-	                    		out.write(nick_s + tabNick);
-	                    		out.write(BMI_s + tabBMI);
-	                    		out.write(weight_s + tabWeight);
-	                    		out.write(height_s + "\r\n");	//add entry to next line
-	                    		out.close();					//flush and close the stream
-	                		}
-	                		catch(IOException f)
-	                		{
-	                			MessageDialog.showMessageDialog(textGUI, "File error", "Save to file was not possible", MessageDialogButton.OK);
-	                		}
-	                		
-	                        MessageDialog.showMessageDialog(textGUI, "BMI", "Calculated BMI: " + BMI + "\n" + selectCategory(), MessageDialogButton.OK);
-	                	}
-	                	catch(NumberFormatException e)
-	                	{
-	                		MessageDialog.showMessageDialog(textGUI, "ERROR", "NumberFormatException:\n" + "Please check if the fields are correctly filled", MessageDialogButton.OK);
-	                	}
-	                	
-	                	
-	                	
-	                }
-	            }).setLayoutData(GridLayout.createLayoutData(GridLayout.Alignment.CENTER, GridLayout.Alignment.CENTER)));
-				
-			}
-		});
-	}
-
-
-		saveButton.addActionListener(new ActionListener()){
+		calculateButton.addActionListener(new ActionListener()
+		{  
+		    public void actionPerformed(ActionEvent e)
+		    {
+		    	try
+		    	{
+		    		//When the button is pressed try to calculate BMI and display it in the DialogBox
+		    		calculate();
+		    		dialogLabel1.setText("Calculated BMI: " + BMI);
+		    		dialogLabel2.setText(selectCategory());
+		    		dialog.setTitle("BMI");
+		    		dialog.setVisible(true);
+		    		
+		    		FileOutputStream file = new FileOutputStream("C:\\temp\\save.txt");
+		    		
+		    		String s2=String.valueOf(BMI);
+		    		
+		    		String s=nick.getText()+" "+weight.getText()+"kg "+height.getText()+"m BMI= s2\n";
+		    		
+		    		byte b[]=s.getBytes();
+		    		
+		    		file.write(b);
+		    		file.close();
+		    		
+		    	}
+		    	catch(NumberFormatException ex)
+		    	{
+		    		//Otherwise the DialogBox will inform user about wrong data in the fields
+		    		dialogLabel1.setText("NumberFormatException");
+		    		dialogLabel2.setText("Please check if the fields are correctly filled");
+		    		dialog.setTitle("ERROR");
+		    		dialog.setVisible(true);
+		    	}
+		    }
+	    } );
 		
-			 public void run()
-             {
-        		 try
-        		 {
-        			 FileReader in = new FileReader(file);
-        			 
-        			 //BufferedReader created to load lines of text instead of simple characters
-        			 BufferedReader buffReader = new BufferedReader(in);
-        			 
-        			 //Local variables to keep read text from file
-        			 String fileText = "";
-        			 String line = "";
-        			 
-        			 //Do until EOF is not reached (specified by returning null by method readLine)
-        			 while( (line = buffReader.readLine()) != null)
-        			 {
-        				 fileText += line + "\r\n";
-        			 }
-        			 
-        			 buffReader.close();
-        			 in.close();
-        			 
-        			 //Added 7 spaces before \r\n due to lanterna issue - it does not count special characters to Dialog size calculations
-            		 MessageDialog.showMessageDialog(textGUI, "Saved data", "Name\t\tBMI     Weight\tHeight       \r\n" + fileText, MessageDialogButton.OK);
-        		 }
-        		 catch(IOException e)
-        		 {
-        			 MessageDialog.showMessageDialog(textGUI, "File error", "Could not load the file", MessageDialogButton.OK);
-        		 }
-             }
-        }).setLayoutData(GridLayout.createLayoutData(GridLayout.Alignment.CENTER, GridLayout.Alignment.CENTER)));
-        
+		
+	    private static JDialog saveDialogC;
+
+
+	    private static void saveDialog(){
+
+	        JFrame frame = new JFrame();
+	
+	        saveDialogC = new JDialog(frame, "SAVE", true);
+
+	      //  saveDialogC.setLayout(new FlowLayout());
+
+	        saveDialogC.setLocationRelativeTo(null);
+
+	        saveDialogC.setSize(400,400);
+
+	        saveDialogC.setVisible(true);
+
+	        
+	        BufferedReader save = null;
+	        
+	            save = new BufferedReader(new FileReader("C:\\temp\\save.txt"));
+	            String line;
+	            while ((line = save.readLine()) != null) {
+	                
+	            	saveDialogC.add(new JLabel(line));
+	            	
+	            }
+
+	    }
+
+		
+		
+		
+		
+	                		//READ
+		
+		saveButton.addActionListener(new ActionListener()
+		{  
+		    public void actionPerformed(ActionEvent e)
+		    {
+		    	try
+		    	{
+		    		saveDialog();
+		    		
+		    	}
+		    	catch(NumberFormatException ex)
+		    	{
+		    		//Otherwise the DialogBox will inform user about wrong data in the fields
+		    		dialogLabel1.setText("Cannot read the file");
+		    		dialogLabel2.setText("Please try again");
+		    		dialog.setTitle("ERROR");
+		    		dialog.setVisible(true);
+		    	}
+		    }
+	    } );
 			
 			
-		}
+			
 		
 		separator = new JSeparator();
 		window.add(separator);
@@ -375,9 +382,10 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 				aboutDialog.setVisible(false);
 			}
 		});
-	}
+	
 
-	public static void main(String[] args) {
+	public static void main(String[] args)
+	{
 		
 		init();
 		
@@ -415,12 +423,15 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 					}
 				});
 		
-		close.addActionListener(new ActionListener(){
+		close.addActionListener(new ActionListener()
+		{
 			//When 'Close' button is pressed
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.exit(0);
 			}
 		});
+		
+		
 	}
-}
+	    
