@@ -24,9 +24,8 @@ import javax.swing.JTextField;
 
 public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	
-	//Private static fields containing weight and height entered by the user (with '_s' there are Strings, with '_d' double numbers)
+	//Private static fields containing weight, height and nick entered by the user (with '_s' there are Strings, with '_d' double numbers)
 	//BMI - field for the result of the calculations
-	//nick - nickname entered by user
 	private static String weight_s = "";
 	private static String height_s = "";
 	private static String BMI_s = "";
@@ -151,7 +150,7 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 			 //Local variable to keep line of read text from file
 			 String line = "";
 			 
-			 //Iterator used for placing labels in correct places
+			 //Iterator used for placing labels and button in correct places and resizing JDialog
 			 int i = 0;
 
 			 //Do until EOF is not reached (specified by returning null by method readLine)
@@ -471,5 +470,4 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 			}
 		});
 	}
-}          	
-	
+}
