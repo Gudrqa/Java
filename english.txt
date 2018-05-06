@@ -1,0 +1,32 @@
+﻿Weight [lbs]
+Height [ft]
+Nick
+History
+Calculate
+About
+Close
+Enter values into boxes below and press 'Calculate' button
+Very severely underweight
+Severely underweight
+Underweight
+Normal (healthy weight)
+Overweight
+Obese Class I (Moderately obese)
+Obese Class II (Severely obese)
+Obese Class III (Very severely obese)
+Could not load the file
+BMI Calculator
+BMI Calculator v0.4
+Created by:
+Michal Glogowski
+Alicja Badower
+Calculated BMI: 
+BMI
+NumberFormatException
+Please check if the fields are correctly filled
+ERROR
+weight=
+height=
+Save was not possible!
+lbs
+ft

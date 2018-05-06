@@ -7,6 +7,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.NumberFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -18,8 +22,9 @@ import javax.swing.JTextField;
 
 /**
  * BMI Calculator with GUI
- * @author Micha³ G³ogowski, Alicja Badower
- * @version 0.2
+ * @author Michal Glogowski, Alicja Badower
+ * @version 0.4
+ * License MIT
  */
 
 public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
@@ -34,6 +39,54 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	private static double height_d = 0;
 	private static double BMI = 0;
 	
+	//Arrays of Strings in which are stored all language descriptions
+	private static String[] polish, english, japanese;
+
+	//String array filled with currently used language description
+	private static String[] localeS;
+	
+	//Object of wrapper class forLocale
+	private static forLocale locale;
+	
+	//The number of lines in language file
+	private final static int lineCountOfLanguageFile = 32;
+	
+	/**
+	 * Method responsible for loading language content from external file
+	 * @param path path of the file
+	 * @param lineCount number of lines in that file
+	 * @return array of Strings in which every element is the line of file
+	 */
+	private static String[] loadLanguageFile(String path, int lineCount)
+	{
+		//Variable to keep lines of read text from file
+		String[] txtFile = new String[lineCount];
+		
+		try
+		{
+			FileReader in = new FileReader(path);
+			 
+			//BufferedReader created to load lines of text instead of simple characters
+			BufferedReader buffReader = new BufferedReader(in);
+			
+			for(int i=0; i<lineCount; i++)
+			{
+				txtFile[i] = buffReader.readLine();
+			}
+			 
+			//Close readers
+			buffReader.close();
+			in.close();
+		}
+		catch(IOException e)
+		{
+			JOptionPane.showMessageDialog(window, "Could not load file \"" + path + "\"");
+			System.exit(0);		//When language file could not be loaded close the application
+		}
+			 
+		return txtFile;
+	}
+
 	/**
 	 * Private static field for the save file's destination
 	 */
@@ -43,7 +96,7 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	private static JFrame window;
 	private static JLabel label1, label2, label3, label4, dialogLabel1, dialogLabel2, aboutLabel1, aboutLabel2, aboutLabel3;
 	private static JTextField weight, height, nick;
-	private static JDialog dialog, aboutDialog, historyDialog;
+	private static JDialog dialog, aboutDialog, historyDialog, languageDalog;
 	private static JButton calculateButton, about, close, history;
 	private static JSeparator separator;
 	
@@ -63,6 +116,9 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		//Parsed strings to double
     	weight_d = Double.parseDouble(weight_s);
     	height_d = Double.parseDouble(height_s);
+
+    	//If locale is set to English then convert their funny metrics to SI
+    	if(localeS==english) convert();
     	
     	//Calculated BMI
     	BMI = weight_d / height_d / height_d;
@@ -76,6 +132,15 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
     	BMI_s = String.valueOf(BMI);
     	weight_s = String.valueOf(weight_d);
     	height_s = String.valueOf(height_d);
+	}
+
+	/**
+	 * Method responsible for converting English imperial units to SI
+	 */
+	private static void convert()
+	{
+		weight_d = weight_d * 0.45359237;
+		height_d = height_d * 0.3048;
 	}
 	
 	/**
@@ -98,14 +163,14 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	private static String selectCategory()
 	{
 		String text;
-		if(BMI<15){text = "Very severely underweight";}
-		else if(BMI<16){text = "Severely underweight";}
-		else if(BMI<18.5){text = "Underweight";}
-		else if(BMI<25){text = "Normal (healthy weight)";}
-		else if(BMI<30){text = "Overweight";}
-		else if(BMI<35){text = "Obese Class I (Moderately obese)";}
-		else if(BMI<40){text = "Obese Class II (Severely obese)";}
-		else{text = "Obese Class III (Very severely obese)";}
+		if(BMI<15) text = localeS[8];
+		else if(BMI<16) text = localeS[9];
+		else if(BMI<18.5) text = localeS[10];
+		else if(BMI<25) text = localeS[11];
+		else if(BMI<30) text = localeS[12];
+		else if(BMI<35) text = localeS[13];
+		else if(BMI<40) text = localeS[14];
+		else text = localeS[15];
 		
 		return text;
 	}
@@ -129,14 +194,13 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	private static String commaToDot(String s) {
 		return s.replace(',','.');
 	}
-
 	
 	/**
 	 * Private static method that displays the saved file's content in a JDialog
 	 */
 	private static void historyDialog(){
 		
-        historyDialog = new JDialog(window, "History");
+        historyDialog = new JDialog(window, localeS[3]);
         historyDialog.setLayout(null);
         historyDialog.setResizable(false);
 
@@ -179,7 +243,7 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 			 JButton closeHistory = new JButton();
 			 historyDialog.add(closeHistory);
 			 closeHistory.setVisible(true);
-			 closeHistory.setText("Close");
+			 closeHistory.setText(localeS[6]);
 			 closeHistory.setSize(90,25);
 			 closeHistory.setLocation(130,20+20*i);
 			 closeHistory.addActionListener(new ActionListener() {
@@ -191,7 +255,7 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		 }
 		 catch(IOException e)
 		 {
-			 JOptionPane.showMessageDialog(window, "Could not load the file");
+			 JOptionPane.showMessageDialog(window, localeS[16]);
 		 }
     }
 	
@@ -201,12 +265,14 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 	 */
 	private static void init()
 	{
+		languageDalog.dispose();
+
 		//MAIN WINDOW
 		window = new JFrame();
 		window.setSize(400,270);
 		window.setLayout(null);
 		window.setResizable(false);
-		window.setTitle("BMI Calculator");
+		window.setTitle(localeS[17]);
 		window.setLocationRelativeTo(null);							//center window
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.setVisible(true);
@@ -215,28 +281,28 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		window.add(label1);
 		label1.setSize(350,25);
 		label1.setLocation(30,20);
-		label1.setText("Enter values into boxes below and press 'Calculate' button");
+		label1.setText(localeS[7]);
 		label1.setVisible(true);
 		
 		label2 = new JLabel();
 		window.add(label2);
 		label2.setSize(100,25);
 		label2.setLocation(30,60);
-		label2.setText("Weight [kg]");
+		label2.setText(localeS[0]);
 		label2.setVisible(true);
 		
 		label3 = new JLabel();
 		window.add(label3);
 		label3.setSize(100,25);
 		label3.setLocation(30,90);
-		label3.setText("Height [m]");
+		label3.setText(localeS[1]);
 		label3.setVisible(true);
 		
 		label4 = new JLabel();
 		window.add(label4);
 		label4.setSize(100,25);
 		label4.setLocation(30,120);
-		label4.setText("Nick");
+		label4.setText(localeS[2]);
 		label4.setVisible(true);
 		
 		weight = new JTextField();
@@ -261,14 +327,14 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		window.add(calculateButton);
 		calculateButton.setSize(90,25);
 		calculateButton.setLocation(280,160);
-		calculateButton.setText("Calculate");
+		calculateButton.setText(localeS[4]);
 		calculateButton.setVisible(true);
 		
 		history = new JButton();
 		window.add(history);
-		history.setSize(90,25);
-		history.setLocation(180,160);
-		history.setText("History");
+		history.setSize(100,25);
+		history.setLocation(170,160);
+		history.setText(localeS[3]);
 		history.setVisible(true);
 		
 		calculateButton.addActionListener(new ActionListener()
@@ -279,9 +345,9 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		    	{
 		    		//When the button is pressed try to calculate BMI and display it in the DialogBox
 		    		calculate();
-		    		dialogLabel1.setText("Calculated BMI: " + BMI);
+		    		dialogLabel1.setText(localeS[22] + BMI);
 		    		dialogLabel2.setText(selectCategory());
-		    		dialog.setTitle("BMI");
+		    		dialog.setTitle(localeS[23]);
 		    		dialog.setVisible(true);
 		    		
             		//Take first 11 letters of nicknames
@@ -291,25 +357,28 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
             		//Save to file
             		try
             		{
+						Date currentDate = new Date();
+
                 		FileWriter out = new FileWriter(file,true);	//the second argument allows to append text to existing file
+						out.write(locale.dateFormat.format(currentDate)+"\n");
                 		out.write(nick_s + ": ");
-                		out.write("BMI=" + BMI_s + ", ");
-                		out.write("weight=" + weight_s + ", ");
-                		out.write("height=" + height_s + "\r\n");	//add entry to next line
+                		out.write(localeS[23]+"=" + BMI_s + ", ");
+                		out.write(localeS[27] + locale.numberFormatLocale.format(weight_d) + "kg" +", ");
+                		out.write(localeS[28] + locale.numberFormatLocale.format(height_d) + "m" +"\r\n");	//add entry to next line
                 		out.close();								//flush and close the stream
             		}
             		catch(IOException ex)
             		{
-            			JOptionPane.showMessageDialog(window, "Save was not possible!");	
+            			JOptionPane.showMessageDialog(window, localeS[29]);
             		}
 		    		
 		    	}
 		    	catch(NumberFormatException ex)
 		    	{
 		    		//Otherwise the DialogBox will inform user about wrong data in the fields
-		    		dialogLabel1.setText("NumberFormatException");
-		    		dialogLabel2.setText("Please check if the fields are correctly filled");
-		    		dialog.setTitle("ERROR");
+		    		dialogLabel1.setText(localeS[24]);
+		    		dialogLabel2.setText(localeS[25]);
+		    		dialog.setTitle(localeS[26]);
 		    		dialog.setVisible(true);
 		    	}
 		    }
@@ -332,22 +401,22 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		
 		about = new JButton();
 		window.add(about);
-		about.setLocation(180,205);
-		about.setSize(90,25);
-		about.setText("About");
+		about.setLocation(170,205);
+		about.setSize(100,25);
+		about.setText(localeS[5]);
 		about.setVisible(true);
 		
 		close = new JButton();
 		window.add(close);
 		close.setSize(90,25);
 		close.setLocation(280,205);
-		close.setText("Close");
+		close.setText(localeS[6]);
 		close.setVisible(true);
 		
 
 		//DIALOG BOX and components
 		dialog = new JDialog();
-		dialog.setSize(275,130);
+		dialog.setSize(335,130);
 		dialog.setResizable(false);
 		dialog.setLayout(null);
 		dialog.setLocationRelativeTo(null);		//center DialogBox
@@ -361,14 +430,14 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		
 		dialogLabel2 = new JLabel();
 		dialog.add(dialogLabel2);
-		dialogLabel2.setSize(280,25);
+		dialogLabel2.setSize(320,25);
 		dialogLabel2.setLocation(10,30);
 		dialogLabel2.setVisible(true);
 		
 		JButton okButton = new JButton();
 		dialog.add(okButton);
 		okButton.setSize(70,25);
-		okButton.setLocation(103,65);
+		okButton.setLocation(132,65);
 		okButton.setText("OK");
 		okButton.setVisible(true);
 		okButton.addActionListener(new ActionListener() {
@@ -381,7 +450,7 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		
 		//'ABOUT' DIALOG BOX and components
 		aboutDialog = new JDialog();
-		aboutDialog.setTitle("BMI Calculator v0.2");
+		aboutDialog.setTitle(localeS[18]);
 		aboutDialog.setSize(150,150);
 		aboutDialog.setResizable(false);
 		aboutDialog.setLayout(null);
@@ -392,21 +461,21 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 		aboutDialog.add(aboutLabel1);
 		aboutLabel1.setSize(100,25);
 		aboutLabel1.setLocation(10,10);
-		aboutLabel1.setText("Created by:");
+		aboutLabel1.setText(localeS[19]);
 		aboutLabel1.setVisible(true);
 		
 		aboutLabel2 = new JLabel();
 		aboutDialog.add(aboutLabel2);
 		aboutLabel2.setSize(100,25);
 		aboutLabel2.setLocation(10,30);
-		aboutLabel2.setText("Micha³ G³ogowski");
+		aboutLabel2.setText(localeS[20]);
 		aboutLabel2.setVisible(true);
 		
 		aboutLabel3 = new JLabel();
 		aboutDialog.add(aboutLabel3);
 		aboutLabel3.setSize(100,25);
 		aboutLabel3.setLocation(10,50);
-		aboutLabel3.setText("Alicja Badower");
+		aboutLabel3.setText(localeS[21]);
 		aboutLabel3.setVisible(true);
 		
 		JButton okButton2 = new JButton();
@@ -421,46 +490,41 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 				aboutDialog.setVisible(false);
 			}
 		});
-	}
-
-	public static void main(String[] args)
-	{
-		init();
 		
 		//Add Listener to calculateButton which detects events
 		calculateButton.addActionListener(new ActionListener()
-		{  
-		    public void actionPerformed(ActionEvent e)
-		    {
-		    	try
-		    	{
-		    		//When the button is pressed try to calculate BMI and display it in the DialogBox
-		    		calculate();
-		    		dialogLabel1.setText("Calculated BMI: " + BMI);
-		    		dialogLabel2.setText(selectCategory());
-		    		dialog.setTitle("BMI");
-		    		dialog.setVisible(true);
-		    	}
-		    	catch(NumberFormatException ex)
-		    	{
-		    		//Otherwise the DialogBox will inform user about wrong data in the fields
-		    		dialogLabel1.setText("NumberFormatException");
-		    		dialogLabel2.setText("Please check if the fields are correctly filled");
-		    		dialog.setTitle("ERROR");
-		    		dialog.setVisible(true);
-		    	}
-		    }
-	    } );
-		
-		about.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				try
 				{
-					//When 'About' button is pressed
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						aboutDialog.setVisible(true);
-					}
-				});
-		
+					//When the button is pressed try to calculate BMI and display it in the DialogBox
+					calculate();
+					dialogLabel1.setText(localeS[22] + BMI);
+					dialogLabel2.setText(selectCategory());
+					dialog.setTitle(localeS[23]);
+					dialog.setVisible(true);
+				}
+				catch(NumberFormatException ex)
+				{
+					//Otherwise the DialogBox will inform user about wrong data in the fields
+					dialogLabel1.setText(localeS[24]);
+					dialogLabel2.setText(localeS[25]);
+					dialog.setTitle(localeS[26]);
+					dialog.setVisible(true);
+				}
+			}
+		} );
+
+		about.addActionListener(new ActionListener()
+		{
+			//When 'About' button is pressed
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				aboutDialog.setVisible(true);
+			}
+		});
+
 		close.addActionListener(new ActionListener()
 		{
 			//When 'Close' button is pressed
@@ -470,4 +534,133 @@ public class BMI_calc_GUI_MichalGlogowski_AlicjaBadower {
 			}
 		});
 	}
+
+	/**
+	 * Method responsible for displaying DialogBox which asks user which language he/she wants to use
+	 */
+	private static void languageDialog()
+	{
+		polish = new String[lineCountOfLanguageFile];
+		english = new String[lineCountOfLanguageFile];
+		japanese = new String[lineCountOfLanguageFile];
+		
+		//Load language files
+		polish = loadLanguageFile("polish.txt",lineCountOfLanguageFile);
+		english = loadLanguageFile("english.txt",lineCountOfLanguageFile);
+		japanese = loadLanguageFile("japanese.txt",lineCountOfLanguageFile);
+		
+		languageDalog = new JDialog(window, "Choose your language");
+		languageDalog.setLayout(null);
+		languageDalog.setResizable(false);
+
+		languageDalog.setSize(175,200);
+		languageDalog.setVisible(true);
+		languageDalog.setLocationRelativeTo(null);
+
+		JButton setLocation = new JButton();
+		languageDalog.add(setLocation);
+		setLocation.setVisible(true);
+		setLocation.setText("Find my location");
+		setLocation.setSize(130,25);
+		setLocation.setLocation(20,20);
+
+		JButton polski = new JButton();
+		languageDalog.add(polski);
+		polski.setVisible(true);
+		polski.setText("Polski");
+		polski.setSize(130,25);
+		polski.setLocation(20,60);
+
+		JButton angielski = new JButton();
+		languageDalog.add(angielski);
+		angielski.setVisible(true);
+		angielski.setText("English");
+		angielski.setSize(130,25);
+		angielski.setLocation(20,90);
+
+		JButton japonski = new JButton();
+		languageDalog.add(japonski);
+		japonski.setVisible(true);
+		japonski.setText("æ—¥æœ¬èªž");
+		japonski.setSize(130,25);
+		japonski.setLocation(20,120);
+
+		languageDalog.setVisible(true);
+
+		japonski.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				localeS=japanese;
+				locale.setLocale(new Locale("ja","JP"));
+				init();
+			}
+		});
+		angielski.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				localeS=english;
+				locale.setLocale(new Locale("en"));
+				init();
+			}
+		});
+		polski.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				localeS=polish;
+				locale.setLocale(new Locale("pl","PL"));
+				init();
+			}
+		});
+		setLocation.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				if (locale.locale.getDisplayCountry()=="Polska") localeS=polish;
+				else if(locale.locale.getDisplayCountry()=="Japan") localeS=japanese;
+				else localeS=english;
+
+				init();
+			}
+		});
+	}
+
+	public static void main(String[] args)
+	{
+		locale = new forLocale();
+		languageDialog();
+	}
+
 }
+
+/**
+ * Wrapper class responsible for correct number and date formatting
+ */
+class forLocale {
+
+    public Locale locale;
+    public NumberFormat numberFormatLocale;
+    public DateFormat dateFormat;
+
+    /**
+     * Set default values for class.
+     * If user wont use setLocale method this will be the preset for data representation.
+     */
+    forLocale()
+    {
+        locale = Locale.getDefault();
+        numberFormatLocale = NumberFormat.getInstance(Locale.ITALY);
+        dateFormat = DateFormat.getDateInstance(DateFormat.FULL, locale);
+    }
+    
+    /**
+     * Set locale, number format and dateFormat. This method is used when user decides to choose on of the predefined languages (not auto selected one).
+     * @param l locale which will be pattern for fields in class wrapper
+     */
+    public void setLocale(Locale l)
+    {
+    	locale = l;
+    	numberFormatLocale = NumberFormat.getInstance(l);
+    	dateFormat = DateFormat.getDateInstance(DateFormat.FULL, l);
+    }
+}
+

@@ -1,0 +1,32 @@
+﻿Waga [kg]
+Wzrost [m]
+Nick
+Historia
+Oblicz
+Informacje
+Zamknij
+Wpisz wartosci w puste miejsca i nacisnij 'Oblicz'
+Bardzo duza niedowaga
+Duza niedowaga
+Niedowaga
+Normalna (zdrowa) waga
+Nadwaga
+Otylosc klasy pierwszej (umiarkowana)
+Otylosc klasy drugiej (duza)
+Otylosc klasy trzeciej (bardzo duza)
+Nie mozna zaladowac pliku
+Kalkulator BMI
+Kalkulator BMI v0.4
+Tworcy:
+Michal Glogowski
+Alicja Badower
+Obliczone BMI: 
+BMI
+Blad formatu numeru
+Sprawdz czy wszystkie pola sa poprawnie wypelnione
+BLAD
+waga=
+wzrost=
+Zapis nie byl mozliwy
+kg
+m
